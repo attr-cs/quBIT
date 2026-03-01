@@ -2,11 +2,65 @@ const prisma = require("../../db/db");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 
+
+const login = async(req,res)=>{
+   try{
+     const {username, password} = req.body;
+    if(!username || !password){
+        return res.status(400).json({success: false, message: "All fields required"});
+    }
+
+    const existUser = await prisma.user.findFirst({
+        where: {
+            OR: [
+                {email: username},
+                {username: username}
+            ]
+        }
+    })
+
+    if(!existUser){
+        return res.status(401).json({success: false, message: "Invalid Credentials"});
+    }
+
+
+    const matches = await bcrypt.compare(password, existUser.password);
+    if(!matches){
+        return res.status(401).json({success: false, message: "Invalid Credentials"});
+    }
+
+    let token = jwt.sign(
+        {id: existUser.id, email: existUser.email},
+        process.env.JWT_SECRET,
+        {expiresIn: '7d'},
+    )
+    return res.status(200).json({
+        success: true,
+        message: "User logged in successfully",
+        data: {
+            id: existUser.id,
+            username: existUser.username,
+            email: existUser.email,
+            name: existUser.name,
+            token
+        }
+    })
+   }catch(error){
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error, user could not be verified"
+        })
+   }
+    
+}
+
+
+
 const register = async(req,res)=>{
     try{
-        const {username, email, password} = req.body;
+        const {username, email, password, name} = req.body;
 
-    if(!username || !email || !password){
+    if(!username || !email || !password || !name){
         return res.json(400).json({success: false, message: "All fields required"});
     }
 
@@ -24,19 +78,16 @@ const register = async(req,res)=>{
     
     const hashpass = await bcrypt.hash(password, 10);
     
-    const role = await prisma.role.findUnique({where: {name: "USER"}});
     
-    if(!role){
-        return res.json(500).json({success: false, message: "Default role not found"});
-
-    }
-
+    
+   
     const newUser = await prisma.user.create({
         data: { 
             username,
             email,
+            name,
             password: hashpass,
-            roleId: "User"
+            
         },
     })
 
@@ -54,6 +105,7 @@ const register = async(req,res)=>{
             id: newUser.id,
             username: newUser.username,
             email: newUser.email,
+            name: newUser.name,
             token
         }
     });
@@ -67,4 +119,17 @@ const register = async(req,res)=>{
     }
 }
 
-module.exports = {register}
+module.exports = {register, login}
+
+
+
+
+
+
+// dummies
+// {
+//   "username": "krishna",
+//   "email": "dhruvbh108@gmail.com",
+//   "password": "dhruv219",
+//   "name": "Vasudev Krishna"
+// }
