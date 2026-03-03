@@ -5,28 +5,33 @@ const workspaceUserMiddleware = async(req, res, next)=>{
     try{
         const {id} = req.params;
         
-        const exists = await prisma.workspace.findUnique({
-            where: {
+        const workspace = await prisma.workspace.findUnique({
+            where:{
                 id
             }
         })
-        if(!exists){
-        return res.status(404).json({success: false, message: "workspace doesnt exist"});    
+        if(!workspace){
+            return res.status(404).json({success: false, message: "Workspace not found", data: null});    
         }
 
-        const membership = await prisma.WorkspaceMember.findFirst({
+        if(!workspace.isPrivate){
+            return next();
+        }
+
+        const isMember = await prisma.workspaceMember.findFirst({
             where:{
                 workspaceId: id,
                 userId: req.user.id
             }
         })
-
-        if(!membership){
-             return res.status(403).json({success: false, message: "not a member of this workspace"});    
+        const isAllowed = workspace.ownerId === req.user.id  ||  !!isMember;
+        if(!isAllowed){
+        return res.status(403).json({success: false, message: "Not authorised for this operation", data: null});    
         }
 
+        
 
-        next();
+        return next();
               
     }catch(err){
         return res.status(401).json({success: false, message: `Invalid Credentials ${err}`});

@@ -4,51 +4,53 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  name      String
-  email     String   @unique
-  password  String
+  id       String @id @default(uuid())
+  username String @unique
+  name     String
+  email    String @unique
+  password String
 
   ownedWorkspaces  Workspace[]       @relation("WorkspaceOwner")
   workspaceMembers WorkspaceMember[]
   files            File[]
   folders          Folder[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  joinRequests JoinRequest[]
 }
 
 model Workspace {
-  id      String @id @default(uuid())
-  name    String
+  id   String @id @default(uuid())
+  name String
 
-  ownerId String
-  owner   User   @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  isPrivate Boolean @default(true)
+  ownerId   String
+  owner     User    @relation("WorkspaceOwner", fields: [ownerId], references: [id])
 
   members WorkspaceMember[]
   folders Folder[]
   files   File[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  joinRequests JoinRequest[]
 
-  @@index([ownerId])
   @@unique([id, ownerId])
+  @@index([ownerId])
 }
 
 model WorkspaceMember {
-  id          String @id @default(uuid())
+  id          String        @id @default(uuid())
   userId      String
   workspaceId String
   role        WorkspaceRole
 
   user      User      @relation(fields: [userId], references: [id])
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   joinedAt DateTime @default(now())
 
@@ -63,8 +65,28 @@ enum WorkspaceRole {
   VIEWER
 }
 
+model JoinRequest {
+  id          String            @id @default(uuid())
+  userId      String
+  workspaceId String
+  status      JoinRequestStatus @default(PENDING)
+
+  user      User      @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([userId, workspaceId])
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Folder {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   workspaceId String
   userId      String
@@ -73,7 +95,7 @@ model Folder {
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 
-  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id])
+  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children Folder[] @relation("FolderHierarchy")
 
   files File[]
@@ -94,9 +116,9 @@ model File {
   userId      String
   folderId    String?
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id])
-  folder    Folder?   @relation(fields: [folderId], references: [id])
+  folder    Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

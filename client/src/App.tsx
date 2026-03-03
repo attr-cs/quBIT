@@ -1,39 +1,53 @@
-import { useState } from 'react'
-import './App.css'
+// import { useEffect, useState } from 'react'
 
-import {Add, Mul} from '../src/components/testing'
-type User = {
-  id: number, 
-  name: string
-};
-type Compo2Props = {
-  namew?: string,
-  age: number
-};
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import { useUserStore } from './store/authStore'
+import './App.css'
+import WorkspacesListPage from './pages/WorkspacesListPage'
+import WorkspacePage from './pages/WorkspacePage'
+
+
 function App() {
-  const [user,  setUser] = useState<User>({id:1, name:"ritik"});
+
+
+  const isAuth = useUserStore((state)=> state.isAuthenticated);
+  const username = useUserStore((state)=> state.user?.username);
   return (
     <>
       <div>
-        {user.id}
-        {user.name}
+      current user: {username}
+        <BrowserRouter>
+          <Routes>
+            {/* PUBLIC ROUTES */}
 
-        {typeof user}
-        <pre>{JSON.stringify(user, null, 2)}</pre>
-        { typeof JSON.stringify(user)}
-        <Mul a={2} b={4}/>
-        <Component2 />
+            <Route path='/login' 
+              element={!isAuth? <LoginPage/>: <Navigate to="/workspaces" replace/>}/>
+            <Route path='/register'
+              element={!isAuth? <RegisterPage/>: <Navigate to="/workspaces" replace/>}/>
+
+
+            {/* PROTECTED ROUTES */}
+
+            <Route path='/workspaces' 
+              element={isAuth? <WorkspacesListPage/>: <Navigate to="/login" replace/> }/>
+            <Route path='/workspace/:id' 
+              element={isAuth? <WorkspacePage/>: <Navigate to="/login" replace/> }/>
+
+            {/* Fallback */}
+            <Route path='*' 
+              element={<Navigate to={isAuth? "/workspaces" : "/login"} replace/> }/>
+
+      
+          </Routes>
+        </BrowserRouter>
       </div>
+      
     </>
   )
 }
 
-function Component2({namew,age}: Compo2Props){
-  return <h1>compo2 {namew}{age}</h1>
-}
 
-Component2.defaultProps = {
-  namew:"hello", age:12,
-};
 
 export default App

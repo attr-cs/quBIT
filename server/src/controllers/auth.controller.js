@@ -7,7 +7,7 @@ const login = async(req,res)=>{
    try{
      const {username, password} = req.body;
     if(!username || !password){
-        return res.status(400).json({success: false, message: "All fields required"});
+        return res.status(400).json({success: false, message: "All fields required", data: null});
     }
 
     const existUser = await prisma.user.findFirst({
@@ -20,13 +20,13 @@ const login = async(req,res)=>{
     })
 
     if(!existUser){
-        return res.status(401).json({success: false, message: "Invalid Credentials"});
+        return res.status(401).json({success: false, message: "Invalid Credentials", data: null});
     }
 
 
     const matches = await bcrypt.compare(password, existUser.password);
     if(!matches){
-        return res.status(401).json({success: false, message: "Invalid Credentials"});
+        return res.status(401).json({success: false, message: "Invalid Credentials", data: null});
     }
 
     let token = jwt.sign(
@@ -34,21 +34,31 @@ const login = async(req,res)=>{
         process.env.JWT_SECRET,
         {expiresIn: '7d'},
     )
+
+    res.cookie("accessToken", token, {
+         httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+    })
+
     return res.status(200).json({
         success: true,
         message: "User logged in successfully",
         data: {
-            id: existUser.id,
-            username: existUser.username,
-            email: existUser.email,
-            name: existUser.name,
-            token
+            user:{
+                id: existUser.id,
+                username: existUser.username,
+                email: existUser.email,
+                name: existUser.name,
+            },
+            
         }
     })
    }catch(error){
         return res.status(500).json({
             success: false,
-            message: "Internal server error, user could not be verified"
+            message: `Internal server error, user could not be verified ${error}`,
+            data: null
         })
    }
     
@@ -61,7 +71,7 @@ const register = async(req,res)=>{
         const {username, email, password, name} = req.body;
 
     if(!username || !email || !password || !name){
-        return res.json(400).json({success: false, message: "All fields required"});
+        return res.json(400).json({success: false, message: "All fields required", data: null});
     }
 
     const exists = await prisma.user.findFirst({
@@ -73,7 +83,7 @@ const register = async(req,res)=>{
         }
     })
     if(exists){
-        return res.json(409).json({success: false, message: "User already exists"});
+        return res.json(409).json({success: false, message: "User already exists", data:null});
     }
     
     const hashpass = await bcrypt.hash(password, 10);
@@ -98,15 +108,23 @@ const register = async(req,res)=>{
         {expiresIn: '7d'}
     )
 
+    res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+    })
+
     return res.status(201).json({
         success: true,
         message: "user registered succesfully",
         data: {
-            id: newUser.id,
-            username: newUser.username,
-            email: newUser.email,
-            name: newUser.name,
-            token
+            user:{
+                id: newUser.id,
+                username: newUser.username,
+                email: newUser.email,
+                name: newUser.name,
+            },
+            
         }
     });
     }catch(error){
@@ -114,7 +132,8 @@ const register = async(req,res)=>{
 
         return res.status(500).json({
             success: false,
-            message: "Internal server error, user could not be created"
+            message: "Internal server error, user could not be created",
+            data: null
         })
     }
 }
