@@ -49,10 +49,23 @@ const getWs = async (req, res) => {
                     select: {
                         members: true
                     }
+                },
+                members: {
+                    where: {
+                        userId: req.user.id
+                    },
+                    select: {
+                        id: true
+                    }
                 }
             }
         });
-        return res.status(200).json({ success: true, message: "Workspaces fetched successfully", data: workspaces });
+
+
+        const finalWorkspaces = workspaces.map(({members, ...rest})=>{
+            return {...rest, isJoined: members.length > 0};
+        })
+        return res.status(200).json({ success: true, message: "Workspaces fetched successfully", data: finalWorkspaces });
     } catch (err) {
         return res.status(500).json({ success: false, message: `Internal server error ${err}`, data: null });
     }
@@ -65,6 +78,22 @@ const getUserWs = async (req, res) => {
             where: {
                 ownerId: req.user.id
             },
+            select: {
+                id: true,
+                name: true,
+                isPrivate: true,
+                createdAt: true,
+                owner: {
+                    select: {
+                        username: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        members: true
+                    }
+                }
+            }
         });
         return res.status(200).json({ success: true, message: "Workspaces fetched successfully", data: workspaces });
     } catch (err) {
@@ -85,7 +114,7 @@ const getW = async (req, res) => {
                 name: true,
                 isPrivate: true,
                 createdAt: true,
-                updatedAt: true,  
+                updatedAt: true, 
                 owner: { select: { id: true, username: true} },
                 members: {
                     select: {
@@ -98,6 +127,15 @@ const getW = async (req, res) => {
                             }
                         },
                         role: true
+                    }
+                },
+                joinRequests: {
+                    where: {
+                        status: "PENDING",
+                    },
+                    select: {
+                        userId: true,
+                        workspaceId: true,
                     }
                 },
                 files: {
@@ -157,12 +195,12 @@ const renameW = async (req, res) => {
 const addUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, role } = req.body;
+        const { userId, role } = req.body;
         if (!["ADMIN", "EDITOR", "VIEWER"].includes(role)) {
             return res.status(400).json({ success: false, message: "Invalid role" });
         }
         const user = await prisma.user.findUnique({
-            where: { username }
+            where: { id: userId }
         })
         if (!user) {
             return res.status(400).json({ success: false, message: `user not found` });
@@ -180,7 +218,7 @@ const addUser = async (req, res) => {
         if (workspace) {
             return res.status(400).json({ success: false, message: `user already added to the workspace` });
         }
-
+    
         const workspacemember = await prisma.workspaceMember.create({
             data: {
                 workspaceId: id,
@@ -188,6 +226,58 @@ const addUser = async (req, res) => {
                 role
             }
         })
+        return res.status(201).json({ success: true, message: "user added successfully", data: workspacemember });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: `Internal server error ${err}`, data:null });
+    }
+}
+
+const joinRequestApprove =  async (req, res) => {
+    try {
+        const { id } = req.params;  // workspace id
+        const { requestId } = req.body;    
+        
+        const joinRequest = await prisma.joinRequest.findUnique({
+            where:{
+                id: requestId,
+            }
+        })
+        if(!joinRequest){
+            return res.status(400).json({ success: false, message: `join request not found` ,data: null});
+        }
+
+        const workspace = await prisma.workspaceMember.findUnique({
+            where: {
+                userId_workspaceId: {
+
+                    workspaceId: id,
+                    userId: joinRequest.userId
+                }
+            }
+        })
+        if (workspace) {
+            return res.status(400).json({ success: false, message: `user already added to the workspace` });
+        }
+    
+        const workspacemember = await prisma.workspaceMember.create({
+            data: {
+                workspaceId: id,
+                userId: joinRequest.userId,
+                role: "EDITOR"
+            }
+        })
+
+        const requestup = await prisma.joinRequest.update({
+            where: {
+                id: requestId,
+            },
+            data: {
+                status: "APPROVED",
+            }
+        })
+        if(!requestup){
+            return res.status(400).json({ success: false, message: `couldnt update the join request`, data: null });
+        }
         return res.status(201).json({ success: true, message: "user added successfully", data: workspacemember });
     } catch (err) {
         return res.status(500).json({ success: false, message: `Internal server error ${err}`, data:null });
@@ -330,4 +420,4 @@ const deleteWorkspace = async (req, res) => {
         return res.status(500).json({ success: false, message: `Internal server error ${err}` });
     }
 }
-module.exports = { joinRequest,getJoinRequests,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace }
+module.exports = { joinRequest ,joinRequestApprove ,getJoinRequests,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace }

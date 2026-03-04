@@ -12,6 +12,7 @@ const workspaceAdminMiddleware = async (req, res, next) => {
         if (!workspace) {
             return res.status(404).json({ success: false, message: "Workspace not found", data: null });
         }
+        req.workspace = workspace;
 
         const isAllowed = workspace.ownerId === req.user.id;
 

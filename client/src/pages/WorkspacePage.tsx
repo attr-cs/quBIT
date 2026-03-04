@@ -24,6 +24,11 @@ interface Folder{
     id: string;
     name: string;
 }
+interface joinRequest{
+    userId: string;
+    workspaceId: string;
+}
+
 interface WorkspaceResponse{
     id: string;
     name: string;
@@ -31,6 +36,7 @@ interface WorkspaceResponse{
     createdAt: string;
     updatedAt: string;
     owner: User;
+    joinRequests: joinRequest[];
     members: Member[],
     files: File[];
     folders: Folder[];
@@ -81,8 +87,9 @@ const WorkspacePage: React.FC = ()=>{
             <GoBack />
             <p>{workspace.name}</p>
             <p>{workspace.owner.username}</p>
-            <pre>{JSON.stringify(workspace, null, 2)}</pre>
-            <p>isPrivate {workspace.isPrivate} </p>
+            <pre>{JSON.stringify(workspace, null, 2)}</pre> <br/>
+            <pre>Join Requests {JSON.stringify(workspace.joinRequests, null, 2)}</pre>
+            <p>isPrivate {workspace.isPrivate ? "private" : "public"} </p>
             {/* <FolderFileHierarchy workspaceId={workspace.id} rootFolders={workspace.folders} rootFiles={workspace.files} />
             <ul>
             {workspace.files.map(file=>

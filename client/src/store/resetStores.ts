@@ -1,5 +1,5 @@
 import {useUserStore} from "./authStore"
-import {queryClient} from "../main"
+import {queryClient} from "../api/queryClient"
 const resetStores = ()=>{
     useUserStore.getState().reset();
     queryClient.clear();

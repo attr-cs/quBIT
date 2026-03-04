@@ -18,6 +18,8 @@ model User {
   files            File[]
   folders          Folder[]
 
+  joinRequests JoinRequest[]
+
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   joinRequests JoinRequest[]
@@ -29,7 +31,7 @@ model Workspace {
 
   isPrivate Boolean @default(true)
   ownerId   String
-  owner     User    @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  owner     User    @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   members WorkspaceMember[]
   folders Folder[]
@@ -49,7 +51,7 @@ model WorkspaceMember {
   workspaceId String
   role        WorkspaceRole
 
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   joinedAt DateTime @default(now())
@@ -71,7 +73,7 @@ model JoinRequest {
   workspaceId String
   status      JoinRequestStatus @default(PENDING)
 
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -92,7 +94,7 @@ model Folder {
   userId      String
   parentId    String?
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id])
 
   parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)

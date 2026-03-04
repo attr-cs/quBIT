@@ -47,7 +47,7 @@ const LoginPage: React.FC = ()=>{
     }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="bg-black">
             <input 
                 type="text"
                 id="" 

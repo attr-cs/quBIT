@@ -7,18 +7,19 @@ import { useUserStore } from './store/authStore'
 import './App.css'
 import WorkspacesListPage from './pages/WorkspacesListPage'
 import WorkspacePage from './pages/WorkspacePage'
+import MainLayout from "./components/MainLayout"
 
 
 function App() {
 
 
   const isAuth = useUserStore((state)=> state.isAuthenticated);
-  const username = useUserStore((state)=> state.user?.username);
+  // const username = useUserStore((state)=> state.user?.username);
   return (
     <>
-      <div>
-      current user: {username}
         <BrowserRouter>
+      <MainLayout>
+      {/* current user: {username} */}
           <Routes>
             {/* PUBLIC ROUTES */}
 
@@ -41,8 +42,8 @@ function App() {
 
       
           </Routes>
+      </MainLayout>
         </BrowserRouter>
-      </div>
       
     </>
   )

@@ -28,10 +28,20 @@ const getJoinRequests = async()=>{
 
 const addUserWorkspace = async(workspaceId: string, userId: string)=>{
     const {data} = await api.post(`/workspace/${workspaceId}/addUser`, {
-        username: userId,
+        userId,
         role: "EDITOR",
     });
     return data;
 }
 
-export  {getWorkspaces, getWorkspaceById, createWorkspace, joinWorkspaceRequest, addUserWorkspace, getJoinRequests};
+const getUserWorkspaces = async()=>{
+    const {data} = await api.get(`/workspace/getUserWorkspaces`);
+    return data.data;
+}
+
+const joinRequestApprove = async(workspaceId: string ,requestId: string)=>{
+    const {data}= await api.post(`/workspace/${workspaceId}/approveRequest`, {requestId});
+    return data;
+}
+
+export  {joinRequestApprove,getUserWorkspaces, getWorkspaces, getWorkspaceById, createWorkspace, joinWorkspaceRequest, addUserWorkspace, getJoinRequests};
