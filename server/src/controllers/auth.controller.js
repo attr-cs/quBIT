@@ -36,7 +36,7 @@ const login = async(req,res)=>{
     )
 
     res.cookie("accessToken", token, {
-         httpOnly: true,
+         httpOnly: false,
         secure: false,
         sameSite: "strict",
     })
@@ -109,7 +109,7 @@ const register = async(req,res)=>{
     )
 
     res.cookie("accessToken", token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: false,
         sameSite: "strict",
     })

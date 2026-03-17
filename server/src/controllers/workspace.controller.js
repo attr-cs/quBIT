@@ -186,7 +186,7 @@ const renameW = async (req, res) => {
             data: { name }
         })
 
-        return res.status(200).json({ success: true, message: "Renamed workspace successfully" });
+        return res.status(200).json({ success: true, message: "Renamed workspace successfully", data: {name: workspace.name} });
     } catch (err) {
         return res.status(500).json({ success: false, message: `Internal server error ${err}` });
     }
@@ -195,7 +195,8 @@ const renameW = async (req, res) => {
 const addUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId, role } = req.body;
+        const userId = req.user.id;
+        const { role } = req.body;
         if (!["ADMIN", "EDITOR", "VIEWER"].includes(role)) {
             return res.status(400).json({ success: false, message: "Invalid role" });
         }
@@ -224,6 +225,11 @@ const addUser = async (req, res) => {
                 workspaceId: id,
                 userId: user.id,
                 role
+            },
+            select: {
+                id: true,
+                userId: true,
+                workspaceId: true
             }
         })
         return res.status(201).json({ success: true, message: "user added successfully", data: workspacemember });
@@ -420,4 +426,34 @@ const deleteWorkspace = async (req, res) => {
         return res.status(500).json({ success: false, message: `Internal server error ${err}` });
     }
 }
-module.exports = { joinRequest ,joinRequestApprove ,getJoinRequests,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace }
+
+const toggleWorkspacePublic = async(req,res)=>{
+    try{
+        const {id} = req.params;
+    const workspace = await prisma.workspace.findUnique({
+            where: {
+                id
+            },
+        })
+        if (!workspace) {
+            return res.status(400).json({ success: false, message: `workspace not found` });
+        }
+
+
+    const updatedWorkspace = await prisma.workspace.update({
+        where: {
+            id
+        },
+        data:{
+            isPrivate: !workspace.isPrivate,
+        }
+    })
+    
+
+    return res.status(201).json({ success: true, message: `workspace made ${updatedWorkspace.isPrivate} successfully`, data: {isPrivate: updatedWorkspace.isPrivate} });
+
+    }catch(err){
+         return res.status(500).json({ success: false, message: `Internal server error ${err}` });
+    }
+}
+module.exports = { joinRequest ,toggleWorkspacePublic,joinRequestApprove ,getJoinRequests,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace }

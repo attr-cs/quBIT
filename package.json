@@ -1,0 +1,26 @@
+{
+  "name": "qubit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attr-cs/quBIT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/attr-cs/quBIT/issues"
+  },
+  "homepage": "https://github.com/attr-cs/quBIT#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "framer-motion": "^12.35.0"
+  }
+}

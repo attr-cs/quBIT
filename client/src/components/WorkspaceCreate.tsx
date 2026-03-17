@@ -14,15 +14,16 @@ interface CreateWorkspaceResponse{
 }
 
 const WorkspaceCreate: React.FC = ()=>{
-    const [isCreating, setIsCreating] = useState<boolean>(false);
-    const [isPrivate, setIsPrivate] = useState<boolean>(true);
-    const [wname, setWname] = useState<string>("");
+    // const [isCreating, setIsCreating] = useState<boolean>(false);
+    // const [isPrivate, setIsPrivate] = useState<boolean>(true);
+    // const [wname, setWname] = useState<string>("");
     const lgid = useUserStore(state=>state.user?.id);
     
     const navigate = useNavigate();
 
     const createWorkspaceMutation = useMutation<CreateWorkspaceResponse,any>({
-        mutationFn: async()=> createWorkspace(wname, isPrivate),
+        // mutationFn: async()=> createWorkspace(wname, isPrivate),
+        mutationFn: async()=> createWorkspace(),
         onSuccess: (data)=>{
             if(data.success){
                 console.log(data.data);
@@ -42,10 +43,10 @@ const WorkspaceCreate: React.FC = ()=>{
         <>
         <div>
 
-        <div onClick={()=>setIsCreating(true)} className="aspect-square hover:scale-[1.02] hover:border-brand-bright/30 transition-all duration-300   cursor-pointer bg-brand-card w-40 h-40 text-sm rounded-md text-[#ccd0cf]h font-semibold flex justify-center content-center">
-            <button  className="text-2xl text-[#646464] text-bold cursor-pointer ">+</button>
+        <div onClick={handleSubmit} className="aspect-square hover:shadow-sm hover:border-brand-bright/30 transition-all duration-300   cursor-pointer bg-brand-card w-40 h-40 text-sm rounded-md text-[#ccd0cf]h font-semibold flex justify-center content-center">
+            <button  className="text-2xl text-[#646464] text-bold cursor-pointer ">+ New</button>
         </div>
-        <div>
+        {/* <div>
 
             {isCreating && (
                 <div className="fixed inset-0 bg-[#646464] opacity-50 flex justify-center content-center">
@@ -58,7 +59,7 @@ const WorkspaceCreate: React.FC = ()=>{
                 </div>
                 </div>
             )}
-        </div>
+        </div> */}
         </div>
         
         </>

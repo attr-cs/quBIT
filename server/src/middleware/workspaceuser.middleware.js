@@ -14,9 +14,7 @@ const workspaceUserMiddleware = async(req, res, next)=>{
             return res.status(404).json({success: false, message: "Workspace not found", data: null});    
         }
 
-        if(!workspace.isPrivate){
-            return next();
-        }
+        
 
         const isMember = await prisma.workspaceMember.findFirst({
             where:{
@@ -25,8 +23,14 @@ const workspaceUserMiddleware = async(req, res, next)=>{
             }
         })
         const isAllowed = workspace.ownerId === req.user.id  ||  !!isMember;
+
+        if(!isAllowed && !workspace.isPrivate){
+            // return res.status(403).json({success: false, message: "join the workspace first", data: null});    
+            return res.status(403).json({code: "JOIN_REQUIRED"});    
+        }
+
         if(!isAllowed){
-        return res.status(403).json({success: false, message: "Not authorised for this operation", data: null});    
+        return res.status(403).json({code: "REQUEST_REQUIRED"});    
         }
 
         

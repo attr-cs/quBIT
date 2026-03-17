@@ -1,4 +1,7 @@
 {
+"scripts": {
+"dev": "nodemon server.js"
+},
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",

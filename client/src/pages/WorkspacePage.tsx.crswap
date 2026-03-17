@@ -1,0 +1,150 @@
+import {useParams, } from "react-router-dom"
+import {getWorkspaceById} from "../api/workspace"
+import {useQuery} from "@tanstack/react-query"
+import {useUserStore} from "../store/authStore";
+import { Lock, AlertCircle } from "lucide-react";
+import JoinPublicWorkspace from "../components/JoinPublicWorkspace"
+import ToggleWorkspacePublicButton from "../components/ToggleWorkspacePublicButton"
+
+// import FolderFileHierarchy from "../components/FolderFileHierarchy"
+import WorkspaceJoinRequest from "../components/WorkspaceJoinRequest";
+import GoBack from "../components/GoBack"
+
+interface User{
+    id: string;
+    username: string;
+}
+interface File{
+    id: string;
+    name: string;
+}
+
+interface Member{
+    user: User;
+    role: "ADMIN" | "EDITOR" | "VIEWER";
+}
+interface Folder{
+    id: string;
+    name: string;
+}
+interface joinRequest{
+    userId: string;
+    workspaceId: string;
+}
+
+interface WorkspaceResponse{
+    id: string;
+    name: string;
+    isPrivate: boolean;
+    createdAt: string;
+    updatedAt: string;
+    owner: User;
+    joinRequests: joinRequest[];
+    members: Member[],
+    files: File[];
+    folders: Folder[];
+}
+
+const WorkspacePage: React.FC = ()=>{
+
+    const {id} = useParams<{id: string}>();
+    const userId = useUserStore(state=>state.user?.id);
+    const {data: workspace, isLoading, isError, error} = useQuery<WorkspaceResponse>({
+        queryKey: ["workspace",id],
+        queryFn: async()=>getWorkspaceById(id!),
+        enabled: !!id,
+        retry: false,
+        
+    })
+
+
+    if(isLoading) return <p>loading..</p>
+    if(isError) {
+        let status = (error as any)?.response?.status;
+        if (status === 401) {
+            return <p>Session expired. Please login again.</p>;
+        }
+
+        if (status === 403) {
+            const code = error.response?.data?.code;
+            console.log(typeof code);
+            if(code=="JOIN_REQUIRED"){
+                 return <JoinPublicWorkspace workspaceId={id} userId={userId} />
+            }
+            return (
+                <div className="min-h-screen bg-brand-deep flex items-center justify-center p-6">
+            <div className="max-w-md w-full space-y-8 text-center">
+                
+                {/* Visual Icon */}
+                <div className="relative mx-auto w-24 h-24">
+                    <div className="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full animate-pulse"></div>
+                    <div className="relative flex items-center justify-center w-full h-full bg-brand-card border border-brand-border/30 rounded-3xl shadow-2xl">
+                        <Lock className="w-10 h-10 text-amber-500" />
+                    </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="space-y-3">
+                    <h2 className="text-3xl font-black tracking-tight text-brand-bright">
+                        Private Access Only
+                    </h2>
+                    <p className="text-brand-muted leading-relaxed font-medium">
+                        You've reached a private workspace. You must be a member or have an approved request to view the contents of <span className="text-brand-bright font-bold">Qubit</span>.
+                    </p>
+                </div>
+
+                {/* Action Card */}
+                <div className="bg-brand-card/50 border border-brand-border/20 p-6 rounded-2xl space-y-6">
+                    <div className="flex items-start gap-3 text-left p-3 bg-brand-surface/30 rounded-lg">
+                        <AlertCircle className="w-5 h-5 text-brand-muted mt-0.5" />
+                        <p className="text-xs text-brand-muted font-medium">
+                            Once you request access, the workspace owner will be notified to review your profile.
+                        </p>
+                    </div>
+                    
+                    <WorkspaceJoinRequest workspaceId={id!} />
+                </div>
+
+                <div className="pt-4">
+                    <GoBack /> 
+                    {/* Note: Ensure GoBack is styled with text-brand-muted hover:text-brand-bright */}
+                </div>
+            </div>
+        </div>
+        );
+        }
+
+        if (status === 404) {
+            return <p>Workspace not found.</p>;
+        }
+
+        if (status === 500) {
+            return <p>Server error. Please try later.</p>;
+        }
+        return <p>{(error as any)?.response.message}</p>
+    }
+    if(!workspace) return null;
+    return (
+        <div>
+            <GoBack />
+
+            {if(userId == workspace.owner.ownerId)}
+            <ToggleWorkspacePublicButton workspaceId={id} isPrivate={workspace.isPrivate}/>
+            <p>{workspace.name}</p>
+            <p>{workspace.owner.username}</p>
+            <pre>{JSON.stringify(workspace, null, 2)}</pre> <br/>
+            <pre>Join Requests {JSON.stringify(workspace.joinRequests, null, 2)}</pre>
+            <p>isPrivate {workspace.isPrivate ? "private" : "public"} </p>
+            {/* <FolderFileHierarchy workspaceId={workspace.id} rootFolders={workspace.folders} rootFiles={workspace.files} />
+            <ul>
+            {workspace.files.map(file=>
+                <li key={file.id}>{file.name}</li>    
+            )}
+            <ul/>
+
+            <p>{workspace.folders}</p> */}
+        </div>
+    )
+}
+
+export default WorkspacePage;

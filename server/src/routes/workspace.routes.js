@@ -1,8 +1,9 @@
-const {joinRequest, joinRequestApprove,getJoinRequests ,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace} = require('../controllers/workspace.controller');
+const {joinRequest, joinRequestApprove,toggleWorkspacePublic ,getJoinRequests ,createWorkspaces, getWs, getUserWs, getW, renameW, addUser, removeUser, deleteWorkspace} = require('../controllers/workspace.controller');
 const express = require('express');
 const authMiddleware= require('../middleware/auth.middleware');
 const workspaceAdminMiddleware= require('../middleware/workspaceadmin.middleware');
 const workspaceUserMiddleware = require('../middleware/workspaceuser.middleware');
+
 
 const router = express.Router();
 
@@ -19,7 +20,9 @@ router.get("/getWorkspace/:id", authMiddleware, workspaceUserMiddleware,  getW);
 router.post("/renameWorkspace/:id", authMiddleware, workspaceAdminMiddleware,  renameW);
 router.post("/:id/approveRequest", authMiddleware, workspaceAdminMiddleware,  joinRequestApprove);
 
-router.post("/:id/addUser", authMiddleware, workspaceAdminMiddleware, addUser);
+router.post("/:id/addUser", authMiddleware, addUser);
 router.post("/:id/removeUser", authMiddleware, workspaceAdminMiddleware, removeUser);
+
+router.post("/:id/togglePublic", authMiddleware, workspaceAdminMiddleware, toggleWorkspacePublic)
 
 module.exports =  router;

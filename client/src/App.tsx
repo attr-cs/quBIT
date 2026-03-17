@@ -7,7 +7,7 @@ import { useUserStore } from './store/authStore'
 import './App.css'
 import WorkspacesListPage from './pages/WorkspacesListPage'
 import WorkspacePage from './pages/WorkspacePage'
-import MainLayout from "./components/MainLayout"
+
 
 
 function App() {
@@ -18,7 +18,7 @@ function App() {
   return (
     <>
         <BrowserRouter>
-      <MainLayout>
+      {/* <MainLayout> */}
       {/* current user: {username} */}
           <Routes>
             {/* PUBLIC ROUTES */}
@@ -42,7 +42,7 @@ function App() {
 
       
           </Routes>
-      </MainLayout>
+      {/* </MainLayout> */}
         </BrowserRouter>
       
     </>
