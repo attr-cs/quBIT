@@ -1,14 +1,15 @@
 import api from "./axios";
 
-interface RegisterRequest{username: string; email: string; password: string; name: string}
+interface RegisterRequest{username: string; email: string; password: string; fname: string, lname: string;}
 interface LoginRequest{username: string; password: string}
 
-const registerUser = async({username, email, password, name}: RegisterRequest)=>{
+const registerUser = async({username, email, password, fname, lname}: RegisterRequest)=>{
     const {data} = await api.post(`/auth/register`, {
         username,
         email,
         password,
-        name
+        fname,
+        lname
     });
     return data;
 }

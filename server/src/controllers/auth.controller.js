@@ -49,7 +49,8 @@ const login = async(req,res)=>{
                 id: existUser.id,
                 username: existUser.username,
                 email: existUser.email,
-                name: existUser.name,
+                fname: existUser.fname,
+                lname: existUser.lname
             },
             
         }
@@ -68,10 +69,10 @@ const login = async(req,res)=>{
 
 const register = async(req,res)=>{
     try{
-        const {username, email, password, name} = req.body;
+        const {username, email, password, fname, lname} = req.body;
 
-    if(!username || !email || !password || !name){
-        return res.json(400).json({success: false, message: "All fields required", data: null});
+    if(!username || !email || !password || !fname || !lname){
+        return res.status(400).json({success: false, message: "All fields required", data: null});
     }
 
     const exists = await prisma.user.findFirst({
@@ -83,7 +84,7 @@ const register = async(req,res)=>{
         }
     })
     if(exists){
-        return res.json(409).json({success: false, message: "User already exists", data:null});
+        return res.status(409).json({success: false, message: "User already exists", data:null});
     }
     
     const hashpass = await bcrypt.hash(password, 10);
@@ -95,8 +96,9 @@ const register = async(req,res)=>{
         data: { 
             username,
             email,
-            name,
             password: hashpass,
+            fname,
+            lname
             
         },
     })
@@ -122,7 +124,8 @@ const register = async(req,res)=>{
                 id: newUser.id,
                 username: newUser.username,
                 email: newUser.email,
-                name: newUser.name,
+                fname: newUser.fname,
+                lname: newUser.lname
             },
             
         }
@@ -139,16 +142,3 @@ const register = async(req,res)=>{
 }
 
 module.exports = {register, login}
-
-
-
-
-
-
-// dummies
-// {
-//   "username": "krishna",
-//   "email": "dhruvbh108@gmail.com",
-//   "password": "dhruv219",
-//   "name": "Vasudev Krishna"
-// }

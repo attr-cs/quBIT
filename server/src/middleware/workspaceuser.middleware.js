@@ -24,18 +24,31 @@ const workspaceUserMiddleware = async(req, res, next)=>{
         })
         const isAllowed = workspace.ownerId === req.user.id  ||  !!isMember;
 
-        if(!isAllowed && !workspace.isPrivate){
+        if(isAllowed){
+            return next();
+        }
+
+        if(!workspace.isPrivate){
             // return res.status(403).json({success: false, message: "join the workspace first", data: null});    
             return res.status(403).json({code: "JOIN_REQUIRED"});    
         }
 
-        if(!isAllowed){
-        return res.status(403).json({code: "REQUEST_REQUIRED"});    
-        }
-
         
+        const pendingRequest = await prisma.joinRequest.findUnique({
+            where:{
+                userId_workspaceId: {
+                    workspaceId: id,
+                    userId: req.user.id
+                }
+            }
+            
 
-        return next();
+        })
+        if(pendingRequest){
+            return res.status(403).json({code: "REQUEST_PENDING"});    
+        }
+        return res.status(403).json({code: "REQUEST_REQUIRED"});    
+
               
     }catch(err){
         return res.status(401).json({success: false, message: `Invalid Credentials ${err}`});

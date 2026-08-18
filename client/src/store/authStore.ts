@@ -1,10 +1,12 @@
 import {create} from "zustand";
 import {persist} from "zustand/middleware"
+
 interface User{
     id: string;
     username: string;
     email: string;
-    name?: string;
+    fname?: string;
+    lname?: string;
 }
 
 interface UserState{
@@ -26,7 +28,6 @@ const useUserStore = create<UserState>()(
     {
         name: "auth-storage",
     }
-
     )
 );
 

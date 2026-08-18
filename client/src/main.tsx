@@ -8,7 +8,7 @@ import App from './App.tsx'
 
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <QueryClientProvider client={queryClient} >
     <App />
 
@@ -20,5 +20,5 @@ createRoot(document.getElementById('root')!).render(
     )}
 
     </QueryClientProvider>
-  </StrictMode>,
+  //  </StrictMode>,
 )

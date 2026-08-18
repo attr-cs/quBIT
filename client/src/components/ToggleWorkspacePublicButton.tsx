@@ -4,8 +4,9 @@ import {queryClient} from '../api/queryClient'
 import {toggleWorkspacePublic} from "../api/workspace"
 import {useNavigate} from "react-router-dom"
 import {useUserStore} from '../store/authStore'
+import { Globe, GlobeOff } from "lucide-react"
 
-interface MakePublicResponse{
+interface JoinPublicResponse{
         success: boolean;
         message: string;
         data: {isPrivate: boolean};
@@ -34,7 +35,14 @@ const ToggleWorkspacePublicButton: React.FC<{workspaceId: string, isPrivate: boo
     }
     return (
         <>
-            <button disabled={joinPublicMutation.isPending} onClick={handleSubmit} >{isPrivate? "Private": "Public"}</button>
+         <button type="button" disabled={joinPublicMutation.isPending} onClick={handleSubmit} className="rounded-full  cursor-pointer w-10 h-10 flex hover:bg-[#1e1e1e]  transition-colors justify-center items-center">
+
+        {isPrivate? <GlobeOff size={18} className="active:scale-110 text-[#ffffff]"/>: <Globe size={20} className="active:scale-110 text-[#ffffff]"/>}
+            
+
+    </button>
+
+        
         </>
     )
 }

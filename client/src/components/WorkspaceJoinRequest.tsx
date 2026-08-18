@@ -5,8 +5,8 @@ import { Loader2, Send, CheckCircle } from "lucide-react";
 
 
 
-const WorkspaceJoinRequest:React.FC<{workspaceId: string}> = ({workspaceId})=>{
-    const [sent, setSent]= useState<boolean>(false);
+const WorkspaceJoinRequest:React.FC<{workspaceId: string, already: boolean}> = ({workspaceId, already})=>{
+    const [sent, setSent]= useState<boolean>(already);
     const joinMutation = useMutation<any, any>({
         mutationFn: async()=>joinWorkspaceRequest( workspaceId),
         onSuccess: (data)=>{

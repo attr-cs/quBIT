@@ -1,52 +1,58 @@
-import React, { useState } from "react";
+import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { createWorkspace } from "../api/workspace";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/authStore";
-import {queryClient} from "../api/queryClient"
+import { queryClient } from "../api/queryClient";
+import { SquarePen } from "lucide-react";
 
-interface CreateWorkspaceResponse{
-    success: boolean;
-    message: string;
-    data:{
-        id: string
-    }
+interface CreateWorkspaceResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+  };
 }
 
-const WorkspaceCreate: React.FC = ()=>{
-    // const [isCreating, setIsCreating] = useState<boolean>(false);
-    // const [isPrivate, setIsPrivate] = useState<boolean>(true);
-    // const [wname, setWname] = useState<string>("");
-    const lgid = useUserStore(state=>state.user?.id);
-    
-    const navigate = useNavigate();
+const WorkspaceCreate: React.FC = () => {
+  // const [isCreating, setIsCreating] = useState<boolean>(false);
+  // const [isPrivate, setIsPrivate] = useState<boolean>(true);
+  // const [wname, setWname] = useState<string>("");
+  const lgid = useUserStore((state) => state.user?.id);
 
-    const createWorkspaceMutation = useMutation<CreateWorkspaceResponse,any>({
-        // mutationFn: async()=> createWorkspace(wname, isPrivate),
-        mutationFn: async()=> createWorkspace(),
-        onSuccess: (data)=>{
-            if(data.success){
-                console.log(data.data);
-                queryClient.invalidateQueries({queryKey: ["workspaces", lgid]})
-                navigate(`/workspace/${data.data.id}`);
-            }
-        },
-        onError: (err)=>{
-            alert(`error ${err.response?.data?.message}`);
-        }
-    })
+  const navigate = useNavigate();
 
-    const handleSubmit = ()=>{
-        createWorkspaceMutation.mutate()
-    }
-    return (
-        <>
-        <div>
+  const createWorkspaceMutation = useMutation<CreateWorkspaceResponse, any>({
+    // mutationFn: async()=> createWorkspace(wname, isPrivate),
+    mutationFn: async () => createWorkspace(),
+    onSuccess: (data) => {
+      if (data.success) {
+        console.log(data.data);
+        queryClient.invalidateQueries({ queryKey: ["workspaces", lgid] });
+        navigate(`/workspace/${data.data.id}`);
+      }
+    },
+    onError: (err) => {
+      alert(`error ${err.response?.data?.message}`);
+    },
+  });
 
-        <div onClick={handleSubmit} className="aspect-square hover:shadow-sm hover:border-brand-bright/30 transition-all duration-300   cursor-pointer bg-brand-card w-40 h-40 text-sm rounded-md text-[#ccd0cf]h font-semibold flex justify-center content-center">
-            <button  className="text-2xl text-[#646464] text-bold cursor-pointer ">+ New</button>
-        </div>
-        {/* <div>
+  const handleSubmit = () => {
+    createWorkspaceMutation.mutate();
+  };
+  return (
+    <div onClick={handleSubmit} className="rounded-full cursor-pointer  w-10 h-10 flex hover:bg-slate-900 transition-colors justify-center items-center">
+      <SquarePen size={20}  className="text-[#ffffff]" />
+
+    </div>
+   
+  );
+};
+
+export default WorkspaceCreate;
+
+{
+  /* <div>
 
             {isCreating && (
                 <div className="fixed inset-0 bg-[#646464] opacity-50 flex justify-center content-center">
@@ -59,11 +65,5 @@ const WorkspaceCreate: React.FC = ()=>{
                 </div>
                 </div>
             )}
-        </div> */}
-        </div>
-        
-        </>
-    )
+        </div> */
 }
-
-export default WorkspaceCreate;

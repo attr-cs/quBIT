@@ -5,7 +5,8 @@ const getAllUsers = async (req,res)=>{
         const users = await prisma.user.findMany({
             select:{
                 id:true,
-                name:true,
+                fname:true,
+                lname: true,
                 username: true,
                 email: true,
                 createdAt: true,
@@ -50,7 +51,8 @@ const getMe = async (req,res)=>{
             select: {
                 id: true,
                 
-                name:true,
+                fname:true,
+                lname:true,
                 username: true,
                 email: true,
                 ownedWorkspaces: {select: {id: true, name: true}},
