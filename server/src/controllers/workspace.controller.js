@@ -100,64 +100,50 @@ const getUserWs = async (req, res) => {
         return res.status(500).json({ success: false, message: `Internal server error ${err}` });
     }
 }
-
 const getW = async (req, res) => {
     try {
-
         const { id } = req.params;
         const workspace = await prisma.workspace.findFirst({
-            where: {
-                id,
-            },
+            where: { id },
             select: {
                 id: true,
                 name: true,
                 isPrivate: true,
                 createdAt: true,
-                updatedAt: true, 
-                owner: { select: { id: true, username: true} },
+                updatedAt: true,
+                owner: { select: { id: true, username: true } },
                 members: {
                     select: {
-
-                        user: {
-                            select: {
-                                id: true,
-                                username: true,
-                                
-                            }
-                        },
-                        role: true
-                    }
+                        user: { select: { id: true, username: true } },
+                        role: true,
+                    },
                 },
                 joinRequests: {
-                    where: {
-                        status: "PENDING",
-                    },
+                    where: { status: "PENDING" },
                     select: {
                         userId: true,
                         workspaceId: true,
-                    }
+                    },
                 },
+                
                 files: {
-                    where: {
-                        folderId: null
-                    },
-                     select: {
-                        id: true,
-                        name: true,
-                    }
-                },
-                folders: {
-                    where: {
-                        parentId: null
-                    },
                     select: {
                         id: true,
-                        name: true
-                    }
-                }
-            }
+                        name: true,
+                        folderId: true,
+                    },
+                },
+                
+                folders: {
+                    select: {
+                        id: true,
+                        name: true,
+                        parentId: true,
+                    },
+                },
+            },
         });
+
         if (!workspace) {
             return res.status(404).json({ success: false, message: "Workspace not found", data: null });
         }
@@ -166,7 +152,7 @@ const getW = async (req, res) => {
     } catch (err) {
         return res.status(500).json({ success: false, message: `Internal server error ${err}`, data: null });
     }
-}
+};
 
 const renameW = async (req, res) => {
     try {

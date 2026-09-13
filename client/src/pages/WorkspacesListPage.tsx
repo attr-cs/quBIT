@@ -72,7 +72,7 @@ const WorkspacesListPage: React.FC = () => {
                 return  (
                     
 
-                    <Link className="relative bg-[#111111] shadow-2xl border-2 border-[#eeeeee]/30   w-50 h-30 m-2 hover:border-slate-400 duration-75  transition-all" to={`/workspace/${workspace.id}`}>
+                    <Link key={workspace.id} className="relative bg-[#111111] shadow-2xl border-2 border-[#eeeeee]/30   w-50 h-30 m-2 hover:border-slate-400 duration-75  transition-all" to={`/workspace/${workspace.id}`}>
 
                     <EllipsisVertical size={14} className="m-3 absolute text-[#a3a3a3] right-0 top-0"></EllipsisVertical>
 

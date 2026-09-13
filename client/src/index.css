@@ -71,3 +71,12 @@ body {
   outline: none !important;
   box-shadow: none !important;
 }
+
+.tab-strip::-webkit-scrollbar {
+  display: none; 
+}
+
+.tab-strip {
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
+}

@@ -48,7 +48,10 @@ useEffect(() => {
 
   // 3. Cleanup listeners on unmount
   return () => {
-  socket.removeAllListeners();
+  socket.off("connect", handleConnect);
+  socket.off("welcome", handleWelcome);
+  socket.off("disconnect", handleDisconnect);
+  socket.off("connect_error", handleConnectError);
   };
 }, []);
 
